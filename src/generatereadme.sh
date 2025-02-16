@@ -8,7 +8,7 @@ import time
 
 # Set API_KEY and GOOGLE_MODEL
 API_KEY=""    #YOUR_GOOGLE_API
-GOOGLE_MODEL="https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent"
+GOOGLE_MODEL="https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent" #https://ai.google.dev/gemini-api/
 
 def send_request_to_api(prompt, max_retries=10):
     """
@@ -63,16 +63,16 @@ def create_readme(src_folder, language='english'):
 
     summary_text = "\n".join(file_summaries)
     prompt = (
-        f"You are an AI assistant specialized in generating README files for projects. "
-        f"Analyze the following project files and generate a detailed and well-structured "
-        f"README file in {language}. Include the following sections: \n\n"
-        f"## Introduction\nProvide an overview of the project.\n\n"
-        f"## Features\nList the main features of the project.\n\n"
-        f"## Installation\nProvide installation steps.\n\n"
-        f"## Usage\nExplain how to use the project. Include example commands with expected input and output.\n\n"
-        f"## Project Structure\nDescribe the purpose of each file with hyperlinks to them.\n\n"
-        f"## Example Usage\nGive an example of how to run or use the project, including input and expected output.\n\n"
-        f"Here is the project content:\n{summary_text}"
+      f"You are an AI assistant specialized in generating README files for projects. "
+      f"Analyze the following project files and generate a detailed and well-structured "
+      f"README file in {language} using Markdown syntax. Ensure proper formatting for headings, lists, and code blocks.\n\n"
+      f"## Introduction\nProvide an overview of the project.\n\n"
+      f"## Features\nList the main features of the project using bullet points (`-`).\n\n"
+      f"## Installation\nProvide installation steps using numbered lists (`1.` `2.` `3.` if sequential, otherwise `-`).\n\n"
+      f"## Usage\nExplain how to use the project. Include example commands with expected input and output in code blocks (` ``` `).\n\n"
+      f"## Project Structure\nDescribe the purpose of each file with hyperlinks to them.\n\n"
+      f"## Example Usage\nGive an example of how to run or use the project, including input and expected output in code blocks (` ``` `).\n\n"
+      f"Here is the project content:\n{summary_text}"
     )
     response = send_request_to_api(prompt)
 
