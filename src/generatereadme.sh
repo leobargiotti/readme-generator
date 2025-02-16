@@ -43,23 +43,27 @@ def send_request_to_api(prompt, max_retries=10):
 
     raise Exception("Error: Maximum retry attempts exceeded.")
 
-def create_readme(src_folder, language='english'):
+def create_readme(src_folder, language='english', output_folder=None, output_filename="README.md"):
     """
-    Generates a README.md file based on the content of the source folder.
+    Generates a README.md file based on the content of the source folder, scanning all subdirectories recursively.
     """
     if not os.path.isdir(src_folder):
         raise ValueError("Error: The source folder does not exist.")
 
     file_summaries = []
-    for filename in os.listdir(src_folder):
-        if filename.startswith(".") or filename.startswith("~$"):
-            continue  # Skip hidden files and temporary files
-        filepath = os.path.join(src_folder, filename)
-        if os.path.isfile(filepath):
-            with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
-                content = f.read()
-                file_url = f"[{filename}](./{os.path.basename(src_folder)}/{filename})"
-                file_summaries.append(f"File: {file_url}\nContent Preview:\n{content}\n")
+    for root, _, files in os.walk(src_folder):
+        for filename in files:
+            if filename.startswith(".") or filename.startswith("~$"):
+                continue  # Skip hidden files and temporary files
+            filepath = os.path.join(root, filename)
+            try:
+                with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+                    content = f.read()
+                    relative_path = os.path.relpath(filepath, os.path.dirname(src_folder))
+                    file_url = f"[{relative_path}](./{relative_path})"
+                    file_summaries.append(f"File: {file_url}\nContent Preview:\n{content}\n")
+            except Exception as e:
+                print(f"Warning: Could not read {filepath}: {e}")
 
     summary_text = "\n".join(file_summaries)
     prompt = (
@@ -76,19 +80,21 @@ def create_readme(src_folder, language='english'):
     )
     response = send_request_to_api(prompt)
 
-    readme_path = os.path.join(os.path.dirname(src_folder), "README.md")
+    readme_path = os.path.join(output_folder if output_folder else os.path.dirname(src_folder), output_filename)
     with open(readme_path, 'w', encoding='utf-8') as f:
         f.write(response)
 
-    print(f"README.md successfully created at {readme_path}")
+    print(f"{output_filename} successfully created at {readme_path}")
 
 def main():
-    parser = argparse.ArgumentParser(description='Generates a README.md file for a project.')
+    parser = argparse.ArgumentParser(description='Generates a README file for a project.')
     parser.add_argument('path_src', help='Path to the source folder.')
-    parser.add_argument('language', nargs='?', default='english', help='Language of the README (default: English).')
+    parser.add_argument('--output_folder', help='Path to the folder where the README file will be saved (default: parent of source).', default=None)
+    parser.add_argument('--language', help='Language of the README (default: English).', default='english')
+    parser.add_argument('--output_filename', help='Name of the output README file (default: README.md).', default='README.md')
 
     args = parser.parse_args()
-    create_readme(args.path_src, args.language)
+    create_readme(args.path_src, args.language, args.output_folder, args.output_filename)
 
 if __name__ == '__main__':
     main()
