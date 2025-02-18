@@ -1,43 +1,43 @@
 # README Generator
 
-This project uses the Google Gemini API to automatically generate a README file for a given project directory.  It analyzes the files within the directory and constructs a comprehensive README.md file including sections for introduction, features, installation, usage, project structure, and example usage.
+This project uses the Google Gemini API to automatically generate a README file for a given project folder.  It analyzes the contents of the folder, including source code, data files, and images, and constructs a comprehensive README.md file.
 
 ## Features
 
-- Automatically generates a README.md file.
-- Analyzes the contents of source code files to provide context.
-- Uses the Google Gemini API for natural language generation.
+- Automatically generates a README.md file in Markdown format.
+- Analyzes source code files and provides content previews.
+- Includes sections for data files and screenshots.
 - Supports specifying output folder and filename.
 - Handles potential errors during file reading and API requests.
-- Customizable language for the generated README.
+- Uses the Google Gemini API for natural language generation to create a well-structured README.
 
 
 ## Installation
 
 1.  Install Python 3: Ensure you have Python 3 installed on your system.
-2.  Install required packages:
+2.  Install required libraries:
     ```bash
     pip install requests argparse
     ```
-3.  Obtain a Google Gemini API Key:  You need a valid API key to use the Google Gemini API.  Follow the instructions on the [Google Gemini API documentation](https://ai.google.dev/gemini-api/) to obtain one.
-4.  Set API Key and Model: Replace `"YOUR_GOOGLE_API"` in `src/generatereadme.sh` with your actual API key.  The GOOGLE_MODEL variable should point to the correct Gemini model.
+3.  Set API Key: Obtain a Google Gemini API key and set the `API_KEY` variable in `src/generatereadme.sh`.  Also ensure `GOOGLE_MODEL` is correctly set.
+4.  Save the script: Save `src/generatereadme.sh` to your local machine.
 
 
 ## Usage
 
-The script takes the path to the source folder as a required argument.  Optional arguments allow specifying the output folder, language, and output filename.
+The script takes the path to the source folder as a required argument.  Optional arguments allow specifying the output folder, language, filename, data folder, and images folder.
 
 ```bash
-python src/generatereadme.sh <path_to_source_folder> [--output_folder <path_to_output_folder>] [--language <language>] [--output_filename <filename>]
+  python src/generatereadme.sh <path_to_source_folder> [-o <output_folder>] [-l <language>] [-f <output_filename>] [-d <data_folder>] [-i <images_folder>]
 ```
 
 Example:
 
 ```bash
-python src/generatereadme.sh ./myproject --output_folder ./docs --language spanish --output_filename "README_es.md"
+  python src/generatereadme.sh ./myproject -o ./docs -l english -f README_en.md -d ./data -i ./images
 ```
 
-This command will generate a README file named `README_es.md` in the `./docs` directory, written in Spanish, based on the contents of the `./myproject` folder.
+This command will generate a README file named `README_en.md` in the `./docs` directory, using English as the language, including data from the `./data` folder and images from the `./images` folder.
 
 
 ## Project Structure
@@ -45,12 +45,5 @@ This command will generate a README file named `README_es.md` in the `./docs` di
 -   [src/generatereadme.sh](./src/generatereadme.sh): The main Python script that generates the README file.
 
 
-## Example Usage
 
-Let's assume you have a project folder named `myproject` with a few files. Running the script:
 
-```bash
-python src/generatereadme.sh ./myproject
-```
-
-will generate a `README.md` file in the `myproject` directory containing a structured README based on the contents of the files within `myproject`.  The exact content of the generated README will depend on the files present in `myproject`.
