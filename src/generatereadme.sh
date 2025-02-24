@@ -100,19 +100,21 @@ def create_readme(src_folder, language='english', output_folder=None, output_fil
 
     summary_text = "\n".join(file_summaries)
     prompt = (
-        f"You are an AI assistant specialized in generating README files for projects. "
-        f"Analyze the following project files and generate a detailed and well-structured "
-        f"README file in {language} using Markdown syntax. Ensure proper formatting for headings, lists, and code blocks.\n\n"
-        f"## Introduction\nProvide an overview of the project.\n\n"
-        f"## Features\nList the main features of the project using bullet points (`-`).\n\n"
-        f"## Installation\nProvide installation steps using numbered lists (`1.` `2.` `3.` if sequential, otherwise `-`).\n\n"
-        f"## Usage\nExplain how to use the project. Include example commands with expected input and output in code blocks (` ``` `).\n\n"
-        f"## Project Structure\nDescribe the purpose of each file with hyperlinks to them.\n\n"
-        f"## Data Files\nDescribe the data files and their purpose (if applicable).\n\n"
-        f"## Example Usage\nGive an example of how to run or use the project, including input and expected output in code blocks (` ``` `).\n\n"
-        f"## Screenshot\nDisplay the images as screenshots with descriptions before each image (if applicable).\n\n"
-        f"Here is the project content:\n{summary_text}"
+    f"You are an AI assistant specialized in generating README files for projects. "
+    f"Analyze the following project files and generate a detailed and well-structured "
+    f"README file in {language} using Markdown syntax. Ensure proper formatting for headings, lists, and code blocks.\n\n"
+    f"## Introduction\nProvide an overview of the project.\n\n"
+    f"## Features\nList the main features of the project using bullet points (`-`).\n\n"
+    f"## Installation\nProvide installation steps using numbered lists (`1.` `2.` `3.` if sequential, otherwise `-`).\n\n"
+    f"## Usage\nExplain how to use the project. Include example commands with expected input and output in code blocks (` ``` `).\n\n"
+    f"## Project Structure\nDescribe the purpose of each file with hyperlinks to them.\n\n"
     )
+    if data_folder:
+        prompt += f"## Data Files\nDescribe the data files and their purpose.\n\n"
+    prompt += f"## Example Usage\nGive an example of how to run or use the project, including input and expected output in code blocks (` ``` `).\n\n"
+    if images_folder:
+        prompt += f"## Screenshot\nDisplay the images as screenshots with descriptions before each image.\n\n"
+    prompt += f"Here is the project content:\n{summary_text}"
     response = send_request_to_api(prompt)
 
     readme_path = os.path.join(output_folder if output_folder else os.path.dirname(src_folder), output_filename)
