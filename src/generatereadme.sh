@@ -113,7 +113,7 @@ def create_readme(src_folder, language='english', output_folder=None, output_fil
         prompt += f"## Data Files\nDescribe the data files and their purpose.\n\n"
     prompt += f"## Example Usage\nGive an example of how to run or use the project, including input and expected output in code blocks (` ``` `).\n\n"
     if images_folder:
-        prompt += f"## Screenshot\nDisplay the images as screenshots with descriptions before each image.\n\n"
+        prompt += f"## Screenshot\nEach screenshot should be preceded by its 1 sentence description to specify the image. Example format:\n Description of the image.\n\n![Alt text](image_path.png)\n\n"
     prompt += f"Here is the project content:\n{summary_text}"
     response = send_request_to_api(prompt)
 
