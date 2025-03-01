@@ -1,15 +1,17 @@
 # README Generator
 
-This project uses the Google Gemini API to automatically generate a README file for a given project folder.  It analyzes the contents of the folder, including source code, data files, and images, and creates a comprehensive README.md file in Markdown format.
+This project uses the Gemini API to automatically generate a README.md file for a given project folder.  It analyzes the files within the folder, extracts relevant information, and constructs a comprehensive README file including an introduction, features, installation instructions, usage examples, project structure, and example usage.  It also handles optional data and image folders.
 
 ## Features
 
 - Automatically generates a README.md file.
-- Supports multiple languages (currently only English is explicitly supported, but the API may handle others).
-- Includes sections for introduction, features, installation, usage, project structure, example usage, data files (optional), and screenshots (optional).
-- Handles various file types and content.
-- Uses the Google Gemini API for natural language processing.
-- Includes error handling and retry mechanisms for API requests.
+- Analyzes the contents of a source folder.
+- Includes descriptions of files and their content previews.
+- Supports optional data and image folders.
+- Generates descriptions for images using Gemini's image analysis capabilities.
+- Customizable output language (currently only English is fully supported).
+- Handles potential errors during file reading and API requests.
+- Uses retries to handle rate limiting from the Gemini API.
 
 
 ## Installation
@@ -17,55 +19,53 @@ This project uses the Google Gemini API to automatically generate a README file 
 1.  Install Python 3: Ensure you have Python 3 installed on your system.
 2.  Install required libraries:
     ```bash
-    pip install requests argparse
+    pip install requests argparse json
     ```
-3.  Set API Key: Obtain a Google Gemini API key and set the `API_KEY` variable in `src/generatereadme.sh`.  Also ensure `GOOGLE_MODEL` is correctly set.
-4.  Save the script: Save `src/generatereadme.sh` to your local machine.
+3.  Obtain a Google Gemini API Key:  You need a valid API key to use the Gemini API.  Follow Google's instructions to obtain one.  Set the `API_KEY` variable in `src/generatereadme.sh` with your key.
+4.  Set GOOGLE_MODEL: Set the `GOOGLE_MODEL` variable in `src/generatereadme.sh` to the correct Gemini model URL.
 
 
 ## Usage
 
-The script takes the path to the source folder as a required argument.  Optional arguments allow specifying the output folder, language, output filename, data folder, and images folder.
+The script takes the path to the source folder as a required argument.  Optional arguments allow specifying the output folder, language, output filename, and paths to data and image folders.
 
 ```bash
-  python src/generatereadme.sh <path_to_source_folder> [-o <output_folder>] [-l <language>] [-f <output_filename>] [-d <data_folder>] [-i <images_folder>]
+python src/generatereadme.sh <path_to_source_folder> [-o <output_folder>] [-l <language>] [-f <output_filename>] [-d <data_folder>] [-i <images_folder>]
 ```
 
 Example:
 
 ```bash
-  python src/generatereadme.sh ./myproject -o ./docs -d ./data -i ./images
+python src/generatereadme.sh ./myproject -o ./docs -f MyProjectREADME.md -d ./data -i ./images
 ```
 
-This command will generate a README.md file in the `./docs` directory based on the contents of the `./myproject` folder, including data from `./data` and images from `./images`.
+This command will process the `myproject` folder, save the README file as `MyProjectREADME.md` in the `docs` folder, include data from the `data` folder, and descriptions of images from the `images` folder.
 
 
 ## Project Structure
 
--   [src/generatereadme.sh](./src/generatereadme.sh): The main Python script that generates the README file.  This script uses the Google Gemini API to generate the README content based on the provided project files.
+-   [src/generatereadme.sh](./src/generatereadme.sh): The main Python script that generates the README file.  This file contains the core logic for processing files, making API calls to Gemini, and generating the Markdown content.
 
 
 ## Example Usage
 
-Let's assume you have a project folder structured like this:
-
-```
-myproject/
-├── src/
-│   └── myprogram.py
-└── data/
-    └── data.csv
-```
-
-Running the script:
+Let's assume you have a project folder named `myproject` with a few files and an `images` folder.  Running the script:
 
 ```bash
-python src/generatereadme.sh ./src -d ./data
+python src/generatereadme.sh ./myproject
 ```
 
-Will generate a `README.md` file (in the `myproject` directory) containing a structured overview of your project, including summaries of `myprogram.py` and `data.csv`.  The exact content will depend on the files' contents and the Google Gemini API's response.
+will generate a `README.md` file in the `myproject` directory containing a structured overview of your project's files and content.  If you include an `images` folder, the generated README will include descriptions and images from that folder.  The exact content of the README will depend on the files and images present in your project folder.
 
 
-##  Disclaimer
+## Data Files (If applicable)
 
-This script requires a valid Google Gemini API key.  The functionality and output heavily rely on the capabilities of the Google Gemini API.  Ensure you understand and comply with Google's terms of service and usage guidelines.  Error handling is included, but unexpected behavior from the API is possible.
+This section will be populated if a `-d` flag is used, listing the files in the specified data folder and their descriptions.
+
+
+## Screenshot (If applicable)
+
+This section will be populated if a `-i` flag is used, showing images from the specified image folder, each preceded by a description generated by the Gemini API.
+
+
+Note:  Remember to replace placeholders like `YOUR_GOOGLE_API` with your actual API key.  The script requires an active internet connection to communicate with the Google Gemini API.  Error handling is included to manage potential issues like network errors and API rate limits.

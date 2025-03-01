@@ -5,6 +5,7 @@ import argparse
 import json
 import requests
 import time
+import base64  # Added missing import
 
 # Set API_KEY and GOOGLE_MODEL
 API_KEY=""    #YOUR_GOOGLE_API
@@ -42,6 +43,73 @@ def send_request_to_api(prompt, max_retries=10):
             raise Exception(f"Network error: {e}")
 
     raise Exception("Error: Maximum retry attempts exceeded.")
+
+
+def send_request_to_api_with_image(prompt, image_path, max_retries=1000):
+    """
+    Send a request to the Gemini API with a given prompt and image, retrying if the request fails due to a 429 error.
+
+    Parameters:
+    - prompt (str): The specific prompt to include in the request.
+    - image_path (str): Path to the image file to analyze.
+    - max_retries (int): Maximum number of retries for the request.
+
+    Returns:
+    - str: The response text or an error message.
+    """
+    # Use the global variables instead of environment variables
+    url = GOOGLE_MODEL
+    api_key = API_KEY
+
+    model_config = {
+        "temperature": 0,
+    }
+
+    headers = {
+        "Content-Type": "application/json"
+    }
+
+    # Read and encode the image
+    with open(image_path, "rb") as img_file:
+        image_data = base64.b64encode(img_file.read()).decode("utf-8")
+
+    # Structure the request for Gemini Pro Vision
+    data = {
+        "contents": [
+            {
+                "parts": [
+                    {"text": prompt},
+                    {
+                        "inline_data": {
+                            "mime_type": "image/png",
+                            "data": image_data
+                        }
+                    }
+                ]
+            }
+        ],
+        "generation_config": model_config
+    }
+
+    retries = 0
+    while retries <= max_retries:
+        try:
+            response = requests.post(f"{url}?key={api_key}", headers=headers, data=json.dumps(data))
+            if response.status_code == 200:
+                result = response.json()
+                try:
+                    return result['candidates'][0]['content']['parts'][0]['text'].replace("*", "")
+                except (KeyError, IndexError):
+                    raise Exception("Error: Unexpected response structure.")
+            elif response.status_code == 429:
+                retries += 1
+                time.sleep(1)
+            else:
+                raise Exception(f"Error {response.status_code}: {response.text}")
+        except Exception as e:
+            raise Exception(str(e))
+    raise Exception("Error: Maximum retries exceeded. Could not complete the request.")
+
 
 def process_folder(folder_path, base_path):
     """
@@ -94,8 +162,21 @@ def create_readme(src_folder, language='english', output_folder=None, output_fil
                         continue
                     filepath = os.path.join(root, filename)
                     relative_path = os.path.relpath(filepath, os.path.dirname(src_folder))
+
+                    # Use the image processing function to get a description
+                    try:
+                        description = send_request_to_api_with_image(
+                            "Describe this image in one sentence, focusing on its main content and purpose.",
+                            filepath
+                        )
+                    except Exception as e:
+                        description = f"Image: {filename}"
+                        print(f"Warning: Could not generate description for {filepath}: {e}")
+
+                    print(description)
+
                     image_url = f"![{filename}](./{relative_path})"
-                    image_summaries.append(f"{image_url}\nDescription: {filename}")
+                    image_summaries.append(f"{description}\n\n{image_url}")
         file_summaries.extend(image_summaries)
 
     summary_text = "\n".join(file_summaries)
@@ -113,7 +194,7 @@ def create_readme(src_folder, language='english', output_folder=None, output_fil
         prompt += f"## Data Files\nDescribe the data files and their purpose.\n\n"
     prompt += f"## Example Usage\nGive an example of how to run or use the project, including input and expected output in code blocks (` ``` `).\n\n"
     if images_folder:
-        prompt += f"## Screenshot\nEach screenshot should be preceded by its 1 sentence description to specify the image. Example format:\n Description of the image.\n\n![Alt text](image_path.png)\n\n"
+        prompt += f"## Screenshot\nEach screenshot should be preceded by its description to specify the image. Example format:\n Description of the image.\n\n![Alt text](image_path.png)\n\n"
     prompt += f"Here is the project content:\n{summary_text}"
     response = send_request_to_api(prompt)
 
