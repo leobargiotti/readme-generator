@@ -173,8 +173,6 @@ def create_readme(src_folder, language='english', output_folder=None, output_fil
                         description = f"Image: {filename}"
                         print(f"Warning: Could not generate description for {filepath}: {e}")
 
-                    print(description)
-
                     image_url = f"![{filename}](./{relative_path})"
                     image_summaries.append(f"{description}\n\n{image_url}")
         file_summaries.extend(image_summaries)
